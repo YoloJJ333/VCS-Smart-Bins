@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>VCHS Bin Sensor Homepage</title>
+    <script>
+        function fetchData() {
+            fetch("/data")
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById("test-content").innerText = data.testContent
+                });
+        }
+        setInterval(fetchData, /*60000*/500); // how often to fetch data
+        window.onload = fetchData;
+    </script>
+</head>
+<body>
+    <h1><strong>test info:</strong> <span id="test-content">Loading...</span></h1>
+</body>
+</html>
