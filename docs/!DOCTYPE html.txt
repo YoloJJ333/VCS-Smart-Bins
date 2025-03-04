@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trashcan Weight Database</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        label, input {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Trashcan Weight Database</h1>
+
+    <form id="trashcanForm">
+        <label for="type">Trashcan Type:</label>
+        <input type="text" id="type" name="type" required><br><br>
+
+        <label for="weight">Weight (kg):</label>
+        <input type="number" id="weight" name="weight" required><br><br>
+
+        <label for="date">Date:</label>
+        <input type="date" id="date" name="date" required><br><br>
+
+        <button type="submit">Add Entry</button>
+    </form>
+
+    <h2>Entries:</h2>
+    <table id="entriesTable">
+        <thead>
+            <tr>
+                <th>Trashcan Type</th>
+                <th>Weight (kg)</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Entries will be dynamically added here -->
+        </tbody>
+    </table>
+
+    <script>
+        // Initialize an array to store database entries
+        const entries = [];
+
+        // Function to update the table with the current entries
+        function updateTable() {
+            const tableBody = document.getElementById('entriesTable').getElementsByTagName('tbody')[0];
+            tableBody.innerHTML = '';  // Clear existing rows
+
+            // Add each entry as a new row in the table
+            entries.forEach(entry => {
+                const row = tableBody.insertRow();
+                row.insertCell(0).textContent = entry.type;
+                row.insertCell(1).textContent = entry.weight;
+                row.insertCell(2).textContent = entry.date;
+            });
+        }
+
+        // Event listener for form submission
+        document.getElementById('trashcanForm').addEventListener('submit', function (event) {
+            event.preventDefault(); // Prevent the default form submission
+
+            const type = document.getElementById('type').value;
+            const weight = document.getElementById('weight').value;
+            const date = document.getElementById('date').value;
+
+            // Add the new entry to the entries array
+            entries.push({ type, weight, date });
+
+            // Clear form fields
+            document.getElementById('trashcanForm').reset();
+
+            // Update the table with the new entry
+            updateTable();
+        });
+    </script>
+
+</body>
+</html>
