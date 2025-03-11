@@ -15,27 +15,40 @@ body {
 }
 header {
     text-align: center;
-    padding: 20px;
+    padding: 5px;
     background: #007bff;
-    color: white;
+    color: #39ff39;
+}
+header a {
+    color: inherit;
+    text-decoration: none;
+}
+header h1 {
+    margin-bottom: 5px;
+    text-decoration: underline;
+}
+header h2 {
+    margin-top: 0px;
 }
 nav {
     text-align: center;
     margin-top: 10px;
+    margin-bottom: 10px;
 }
 nav a {
     margin: 0 15px;
     text-decoration: none;
     color: #007bff;
     font-weight: bold;
-}
-section {
-    margin-top: 20px;
+    font-size: 18px;
 }
 footer {
     text-align: center;
-    padding: 10px;
+    padding: 20px;
     margin-top: 20px;
     background: #007bff;
     color: white;
+}
+footer p {
+    margin: 5px;
 }
