@@ -13,7 +13,7 @@
 #define I2C_MASTER_FREQ_HZ 100000
 
 // Wi-Fi Configuration
-const char *ssid = "VCS Bin Portal";
+const char *ssid = "VCS Smart Bin Portal";
 const char *password = "password 123";
 
 WebServer server(80);
