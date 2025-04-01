@@ -16,6 +16,9 @@
 const char *ssid = "VCS Smart Bin Portal";
 const char *password = "password 123";
 
+// Controller Configuration
+const int id = 0;
+
 WebServer server(80);
 
 // Function to initialize I2C
@@ -66,7 +69,10 @@ void handleData()
 {
     // copy paste each line to add data to be sent through json (remember to double check ',')
     String json = "{\
-    \"testContent\":\"" + String(read_light()) + "\"\
+    \"testContent\":\"" + String(read_light()) + "\",\
+    \"id\":\"" + String(id) + "\",\
+    \"weight\":\"" + String(read_light()) + "\",\
+    \"time\":\"" + String(read_light()) + "\"\
     }";
     server.send(200, "application/json", json);
 }

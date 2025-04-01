@@ -12,29 +12,44 @@
             fetch("/data")
                 .then(response => response.json())
                 .then(data => {
-                    document.getElementById("test-content").innerText = data.testContent
+                    document.getElementById("test-content").innerText = data.testContent;
+                    const id = data.id;
+                    const weight = data.weight;
+                    const time = data.time;
+                    entries.push({id, weight, time});
+                    updateTable();
                 });
-            updateTable();
         }
 
         function updateTable() {
+            const tableBody = document.getElementById('entriesTable').getElementsByTagName('tbody')[0];
+            tableBody.innerHTML = '';  // Clear existing rows
 
+            // Add each entry as a new row in the table
+            entries.forEach(entry => {
+                const row = tableBody.insertRow();
+                row.insertCell(0).textContent = entry.id;
+                row.insertCell(1).textContent = entry.weight;
+                row.insertCell(2).textContent = entry.time;
+            });
         }
 
         setInterval(fetchData, 60000); // how often to fetch data
         window.onload = fetchData;
-
     </script>
 </head>
 <body>
     <h1><strong>test info:</strong> <span id="test-content">Loading...</span></h1>
-    <h2>Entries:</h2>
+    <h3>Entries:</h3>
     <table id="entriesTable">
         <thead>
             <tr>
-                <th></th>
+                <th>Trashcan Id</th>
+                <th>Weight (kg)</th>
+                <th>Time</th>
             </tr>
         </thead>
+        <tbody></tbody>
     </table>
     <input id="updateNow" type="button" value="Update Data Now" onclick="fetchData();">
 </body>
