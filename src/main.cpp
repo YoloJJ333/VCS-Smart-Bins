@@ -9,7 +9,7 @@
 #endif
 
 // Define GPIOs
-#define lightreader 36
+const int lightreader = 36;
 const int HX711_dout = 17; // mcu > HX711 dout pin
 const int HX711_sck = 16;  // mcu > HX711 sck pin
 
@@ -19,8 +19,9 @@ const int HX711_sck = 16;  // mcu > HX711 sck pin
 #define I2C_MASTER_FREQ_HZ 100000
 
 // Wi-Fi Configuration
-const char *ssid = "VCS Smart Bin Portal";
-const char *password = "password 123";
+// const char *ssid = "VCS Smart Bin Portal";
+const char *ssid = "PenTest Warriors";
+const char *password = "Penwarriorz23";
 
 // Controller Configuration
 const int id = 0;
@@ -66,23 +67,6 @@ void handleRoot()
   }
   server.streamFile(file, "text/html");
   file.close();
-}
-
-// API to send JSON data
-void handleData()
-{
-  // copy paste each line to add data to be sent through json (remember to double check ',')
-  String json = "{\
-    \"id\":\"" + String(id) +
-                "\",\
-    \"weight\":\"" +
-                String(read_weight()) + "\",\
-    \"time\":\"" +
-                String(millis()) + "\"\
-    \"light\":\"" +
-                String(read_light()) + "\",\
-    }";
-  server.send(200, "application/json", json);
 }
 
 const int calVal_eepromAdress = 0;
@@ -248,11 +232,28 @@ int read_light()
   return light;
 }
 
+boolean newDataReady = false;
+
 float read_weight()
 {
-  if (LoadCell.update()) {
+  if (newDataReady) {
+    newDataReady = false;
     return LoadCell.getData();
   }
+  return -1;
+}
+
+// API to send JSON data
+void handleData()
+{
+  // copy paste each line to add data to be sent through json (remember to double check ',')
+  String json = "{\
+    \"id\":\"" + String(id) + "\",\
+    \"weight\":\"" + String(read_weight()) + "\",\
+    \"time\":\"" + String(millis()) + "\",\
+    \"light\":\"" + String(read_light()) + "\"\
+    }";
+  server.send(200, "application/json", json);
 }
 
 void setup()
@@ -261,6 +262,33 @@ void setup()
   delay(10);
   Serial.println();
   Serial.println("Starting...");
+
+  // Initialize I2C
+  i2c_master_init();
+
+  // Run I2C Scanner
+  i2c_scanner();
+
+  // Initialize Wi-Fi
+  Serial.print("Setting up Wi-Fi...");
+  // WiFi.softAP(ssid, password);
+  Wifi.begin(ssid, password);
+  IPAddress IP = WiFi.softAPIP();
+  Serial.print("Wi-Fi IP Address: ");
+  Serial.println(IP);
+
+  // Set up web server
+  if (!LittleFS.begin(true))
+  {
+    Serial.println("LittleFS Mount Failed!");
+    return;
+  }
+  Serial.println("LittleFS Initialized!");
+
+  server.on("/", HTTP_GET, handleRoot);
+  server.on("/data", HTTP_GET, handleData);
+  server.begin();
+  Serial.println("Web server started");
 
   LoadCell.begin();
   // LoadCell.setReverseOutput(); //uncomment to turn a negative output value to positive
@@ -281,32 +309,6 @@ void setup()
   while (!LoadCell.update())
     ;
   calibrate(); // start calibration procedure
-
-  // Initialize I2C
-  i2c_master_init();
-
-  // Run I2C Scanner
-  i2c_scanner();
-
-  // Initialize Wi-Fi
-  Serial.print("Setting up Wi-Fi...");
-  WiFi.softAP(ssid, password);
-  IPAddress IP = WiFi.softAPIP();
-  Serial.print("Wi-Fi IP Address: ");
-  Serial.println(IP);
-
-  // Set up web server
-  if (!LittleFS.begin(true))
-  {
-    Serial.println("LittleFS Mount Failed!");
-    return;
-  }
-  Serial.println("LittleFS Initialized!");
-
-  server.on("/", HTTP_GET, handleRoot);
-  server.on("/data", HTTP_GET, handleData);
-  server.begin();
-  Serial.println("Web server started");
 }
 
 void loop()
@@ -330,4 +332,87 @@ void loop()
   {
     Serial.println("Tare complete");
   }
+
+  if (LoadCell.update()) {
+    newDataReady = true;
+    Serial.println(LoadCell.getData());
+  }
 }
+
+// #include <ThreeWire.h>
+// #include <RtcDS1302.h>
+// ThreeWire myWire(26,27,35); // IO/DAT, SCLK/CLK, CE/RST
+// RtcDS1302<ThreeWire> Rtc(myWire);
+// #define countof(a) (sizeof(a) / sizeof(a[0]))
+// void printDateTime(const RtcDateTime& dt)
+// {
+//  char datestring[20];
+
+//  snprintf_P(datestring,
+//  countof(datestring),
+//  PSTR("%02u/%02u/%04u %02u:%02u:%02u"),
+//  dt.Month(),
+//  dt.Day(),
+//  dt.Year(),
+//  dt.Hour(),
+//  dt.Minute(),
+//  dt.Second() );
+// }
+// void setup ()
+// {
+//  Serial.begin(115200);
+//  Serial.print("compiled: ");
+//  Serial.print(__DATE__);
+//  Serial.println(__TIME__);
+//  Rtc.Begin();
+//  RtcDateTime compiled = RtcDateTime(__DATE__, __TIME__);
+//  printDateTime(compiled);
+//  Serial.println();
+// //  Rtc.SetDateTime(compiled);
+//  if (!Rtc.IsDateTimeValid())
+//  {
+//  // Common Causes:
+//  // 1) first time you ran and the device wasn't running yet
+//  // 2) the battery on the device is low or even missing
+//  Serial.println("RTC lost confidence in the DateTime!");
+//  Rtc.SetDateTime(compiled);
+//  }
+//  if (Rtc.GetIsWriteProtected())
+//  {
+//  Serial.println("RTC was write protected, enabling writing now");
+
+//  Rtc.SetIsWriteProtected(false);
+//  }
+//  if (!Rtc.GetIsRunning())
+//  {
+//  Serial.println("RTC was not actively running, starting now");
+//  Rtc.SetIsRunning(true);
+//  }
+//  RtcDateTime now = Rtc.GetDateTime();
+//  if (now < compiled)
+//  {
+//  Serial.println("RTC is older than compile time! (Updating DateTime)");
+//  Rtc.SetDateTime(compiled);
+//  }
+//  else if (now > compiled)
+//  {
+//  Serial.println("RTC is newer than compile time. (this is expected)");
+//  }
+//  else if (now == compiled)
+//  {
+//  Serial.println("RTC is the same as compile time! (not expected but all is fine)");
+//  }
+// }
+// void loop ()
+// {
+//  RtcDateTime now = Rtc.GetDateTime();
+//  printDateTime(now);
+//  Serial.println();
+//  if (!now.IsValid())
+//  {
+//  // Common Causes:
+//  // 1) the battery on the device is low or even missing and the power line was disconnected
+//  Serial.println("RTC lost confidence in the DateTime!");
+//  }
+//  delay(10000); // ten seconds
+// }

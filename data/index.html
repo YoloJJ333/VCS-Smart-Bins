@@ -105,12 +105,15 @@
             fetch("/data")
                 .then(response => response.json())
                 .then(data => {
-                    document.getElementById("test-content").innerText = data.testContent;
+                    // document.getElementById("test-content").innerText = data.weight;
                     const id = data.id;
                     const weight = data.weight;
                     const time = data.time;
-                    entries.push({id, weight, time});
-                    // updateTable();
+                    const light = data.light;
+                    if (light > 100) {
+                        entries.push({id, time, weight, light});
+                    }
+                    updateTable();
                 })
                 .catch(error => {
                     console.error("Error fetching data:", error);
@@ -127,10 +130,11 @@
                 row.insertCell(0).textContent = entry.id;
                 row.insertCell(1).textContent = entry.weight;
                 row.insertCell(2).textContent = entry.time;
+                row.insertCell(3).textContent = entry.light;
             });
         }
 
-        setInterval(fetchData, 1000); // Fetch data every minute
+        setInterval(fetchData, 60000); // Fetch data every minute
         window.onload = fetchData;
     </script>
 </head>
@@ -138,7 +142,7 @@
     <div class="container">
         <header>
             <h1>VCHS Bin Sensor Dashboard</h1>
-            <p><strong>Test Info:</strong> <span id="test-content">Loading...</span></p>
+            <!-- <p><strong>Test Info:</strong> <span id="test-content">Loading...</span></p> -->
         </header>
 
         <h3>Entries:</h3>
@@ -146,8 +150,9 @@
             <thead>
                 <tr>
                     <th>Trashcan Id</th>
-                    <th>Weight (kg)</th>
+                    <th>Weight (g)</th>
                     <th>Time</th>
+                    <th>Light level</th>
                 </tr>
             </thead>
             <tbody></tbody>
