@@ -108,10 +108,11 @@
                     // document.getElementById("test-content").innerText = data.weight;
                     const id = data.id;
                     const weight = data.weight;
+                    const date = data.date;
                     const time = data.time;
                     const light = data.light;
                     if (light > 100) {
-                        entries.push({id, time, weight, light});
+                        entries.push({id, date, time, weight, light});
                     }
                     updateTable();
                 })
@@ -128,9 +129,10 @@
             entries.forEach(entry => {
                 const row = tableBody.insertRow();
                 row.insertCell(0).textContent = entry.id;
-                row.insertCell(1).textContent = entry.weight;
+                row.insertCell(1).textContent = entry.date;
                 row.insertCell(2).textContent = entry.time;
-                row.insertCell(3).textContent = entry.light;
+                row.insertCell(3).textContent = entry.weight;
+                row.insertCell(4).textContent = entry.light;
             });
         }
 
@@ -150,9 +152,10 @@
             <thead>
                 <tr>
                     <th>Trashcan Id</th>
-                    <th>Weight (g)</th>
+                    <th>Date</th>
                     <th>Time</th>
-                    <th>Light level</th>
+                    <th>Weight (g)</th>
+                    <th>Light Level</th>
                 </tr>
             </thead>
             <tbody></tbody>

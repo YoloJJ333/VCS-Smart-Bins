@@ -4,6 +4,7 @@
 #include <WebServer.h>
 #include <LittleFS.h>
 #include <HX711_ADC.h>
+#include <esp_wifi.h>
 #if defined(ESP8266) || defined(ESP32) || defined(AVR)
 #include <EEPROM.h>
 #endif
@@ -19,12 +20,12 @@ const int HX711_sck = 16;  // mcu > HX711 sck pin
 #define I2C_MASTER_FREQ_HZ 100000
 
 // Wi-Fi Configuration
-// const char *ssid = "VCS Smart Bin Portal";
-const char *ssid = "PenTest Warriors";
+const char *ssid = "VCS Smart Bin Portal";
+// const char *ssid = "PenTest Warriors";
 const char *password = "Penwarriorz23";
 
 // Controller Configuration
-const int id = 0;
+const int id = 1;
 
 // HX711 constructor:
 HX711_ADC LoadCell(HX711_dout, HX711_sck);
@@ -243,14 +244,48 @@ float read_weight()
   return -1;
 }
 
+String date = __DATE__;
+int previous_day = 0;
+
+void update_date(int days) {
+  String month = date.substring(0, 3);
+  int day = date.substring(4, 6).toInt();
+  int year = date.substring(7, 11).toInt();
+  day += days - previous_day;
+  previous_day = days;
+  date = month + " " + String(day) + " " + String(year);
+}
+
+String get_time() {
+  String time = __TIME__;
+  int delimit = time.indexOf(":");
+
+  long long hour = time.substring(0, delimit).toInt();
+  time = time.substring(delimit + 1);
+  delimit = time.indexOf(":");
+  long long minute = time.substring(0, delimit).toInt();
+  time = time.substring(delimit + 1);
+  long long second = time.toInt();
+
+  second += millis() / 1000;
+  minute += second / 60;
+  second %= 60;
+  hour += minute / 60;
+  minute %= 60;
+  update_date(hour / 24);
+  hour %= 24;
+  return String(hour) + ":" + String(minute) + ":" + String(second);
+}
+
 // API to send JSON data
 void handleData()
 {
   // copy paste each line to add data to be sent through json (remember to double check ',')
   String json = "{\
     \"id\":\"" + String(id) + "\",\
+    \"time\":\"" + get_time() + "\",\
+    \"date\":\"" + date + "\",\
     \"weight\":\"" + String(read_weight()) + "\",\
-    \"time\":\"" + String(millis()) + "\",\
     \"light\":\"" + String(read_light()) + "\"\
     }";
   server.send(200, "application/json", json);
@@ -270,12 +305,21 @@ void setup()
   i2c_scanner();
 
   // Initialize Wi-Fi
-  Serial.print("Setting up Wi-Fi...");
-  // WiFi.softAP(ssid, password);
-  Wifi.begin(ssid, password);
-  IPAddress IP = WiFi.softAPIP();
-  Serial.print("Wi-Fi IP Address: ");
-  Serial.println(IP);
+  Serial.println("Setting up Wi-Fi...");
+  WiFi.softAP(ssid, password);
+  // WiFi.begin(ssid, password);
+  // IPAddress IP = WiFi.softAPIP();
+  // Serial.print("Wi-Fi IP Address: ");
+  // Serial.println(IP);
+  uint8_t baseMac[6];
+  esp_err_t ret = esp_wifi_get_mac(WIFI_IF_STA, baseMac);
+  if (ret == ESP_OK) {
+    Serial.printf("Mac Address: %02x:%02x:%02x:%02x:%02x:%02x\n",
+                  baseMac[0], baseMac[1], baseMac[2],
+                  baseMac[3], baseMac[4], baseMac[5]);
+  } else {
+    Serial.println("Failed to read MAC address");
+  }
 
   // Set up web server
   if (!LittleFS.begin(true))
@@ -335,7 +379,7 @@ void loop()
 
   if (LoadCell.update()) {
     newDataReady = true;
-    Serial.println(LoadCell.getData());
+    // Serial.println(LoadCell.getData());
   }
 }
 

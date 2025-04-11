@@ -13,11 +13,20 @@ body {
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     border-radius: 8px;
 }
-.container p, h1 {
-    margin: 5px
+.container p {
+    margin: 5px;
+    font-size: 18px;
+}
+.title-wrapper {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
 }
 header {
-    text-align: center;
+    position: relative;
+    display: flex;
+    align-items: center;
     padding: 5px;
     background: #007bff;
     color: #39ff39;
@@ -29,9 +38,6 @@ header a {
 header h1 {
     margin-bottom: 5px;
     text-decoration: underline;
-}
-header h2 {
-    margin-top: 0px;
 }
 nav {
     text-align: center;
